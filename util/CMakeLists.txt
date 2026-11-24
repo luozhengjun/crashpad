@@ -404,14 +404,9 @@ endif (APPLE)
 
 
 if (CRASHPAD_HTTPS_TRANSPORT STREQUAL "OPENSSL")
-    if (NOT ANDROID)
-        find_package(OpenSSL REQUIRED)
-        target_compile_definitions(util PUBLIC CRASHPAD_USE_BORINGSSL)
-        target_link_libraries(util PUBLIC OpenSSL::SSL OpenSSL::Crypto)
-    else()
-        target_link_libraries(util PUBLIC openssl-android-binary)
-        target_compile_definitions(util PUBLIC CRASHPAD_USE_BORINGSSL)
-    endif()
+    find_package(OpenSSL REQUIRED)
+    target_compile_definitions(util PUBLIC CRASHPAD_USE_BORINGSSL)
+    target_link_libraries(util PUBLIC OpenSSL::SSL OpenSSL::Crypto)
 elseif (CRASHPAD_HTTPS_TRANSPORT STREQUAL "CURL")
     target_link_libraries(util PUBLIC CURL::libcurl)
 endif ()
@@ -424,15 +419,17 @@ if (WIN32)
     target_link_libraries(util PUBLIC winhttp version compat_incl)
 endif (WIN32)
 
-target_include_directories(util PUBLIC ..)
+target_include_directories(util
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+    PUBLIC $<INSTALL_INTERFACE:include/crashpad>)
 target_link_libraries(util PUBLIC mini_chromium ZLIB::ZLIB backtrace_common)
 
-if (LINUX AND NOT ANDROID)
+if (LINUX)
     if (OPENSSL_FOUND)
         target_compile_definitions(util PUBLIC CRASHPAD_USE_BORINGSSL)
         target_link_libraries(util PUBLIC OpenSSL::SSL OpenSSL::Crypto)
     endif (OPENSSL_FOUND)
-endif (LINUX AND NOT ANDROID)
+endif (LINUX)
 
 if (ANDROID)
     target_compile_definitions(util PUBLIC CRASHPAD_FLOCK_ALWAYS_SUPPORTED=0)

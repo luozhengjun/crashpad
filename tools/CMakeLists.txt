@@ -6,5 +6,7 @@ set(CRASHPAD_TOOLS_LIBRARY_FILES
 add_library(tools OBJECT ${CRASHPAD_TOOLS_LIBRARY_FILES})
 target_compile_features(tools PUBLIC cxx_std_14)
 
-target_include_directories(tools PUBLIC ..)
+target_include_directories(tools
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+    PUBLIC $<INSTALL_INTERFACE:include/crashpad>)
 target_link_libraries(tools PUBLIC mini_chromium backtrace_common util compat snapshot)

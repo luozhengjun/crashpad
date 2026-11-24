@@ -54,9 +54,6 @@ target_compile_definitions(backtrace_common INTERFACE
 
 if (ANDROID)
     option(CRASHPAD_HTTPS_TRANSPORT "Crashpad HTTPS transport" "OPENSSL")
-    if (CRASHPAD_HTTPS_TRANSPORT STREQUAL "OPENSSL")
-        add_subdirectory(third_party/openssl-android-binary)
-    endif()
 elseif (APPLE)
     # do nothing
 elseif (LINUX)
@@ -83,3 +80,53 @@ add_subdirectory(tools)
 if (CRASHPAD_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif (CRASHPAD_BUILD_EXAMPLES)
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+# 1. Collect core targets
+set(CRASHPAD_INSTALL_TARGETS client util compat mini_chromium backtrace_common compat_incl)
+
+if(CRASHPAD_HANDLER_GENERATE_STATIC_LIB)
+    list(APPEND CRASHPAD_INSTALL_TARGETS handlerlib tools snapshot minidump)
+endif()
+
+if(APPLE AND TARGET mig_output)
+    list(APPEND CRASHPAD_INSTALL_TARGETS mig_output)
+endif()
+
+# 2. Install libraries and crashpad_handler
+install(TARGETS ${CRASHPAD_INSTALL_TARGETS} handler
+    EXPORT CrashpadTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+# 3. Install Crashpad headers (preserving directory layout)
+install(DIRECTORY client util compat snapshot
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/crashpad
+    FILES_MATCHING PATTERN "*.h"
+)
+
+# 4. Install mini_chromium headers
+install(DIRECTORY third_party/mini_chromium/mini_chromium/base
+                  third_party/mini_chromium/mini_chromium/build
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/crashpad/mini_chromium
+    FILES_MATCHING PATTERN "*.h"
+)
+
+# 5. Export CMake targets so downstream projects can use find_package(Crashpad)
+install(EXPORT CrashpadTargets
+    FILE CrashpadTargets.cmake
+    NAMESPACE Crashpad::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Crashpad
+)
+
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CrashpadConfig.cmake"
+    "include(\"\${CMAKE_CURRENT_LIST_DIR}/CrashpadTargets.cmake\")\n"
+)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/CrashpadConfig.cmake"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Crashpad
+)

@@ -54,7 +54,9 @@ endif()
 target_compile_features(client PUBLIC cxx_std_14)
 
 target_link_libraries(client PUBLIC mini_chromium util compat)
-target_include_directories(client PUBLIC ..)
+target_include_directories(client
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+    PUBLIC $<INSTALL_INTERFACE:include/crashpad>)
 
 if (LINUX)
     target_link_libraries(client PUBLIC Threads::Threads)

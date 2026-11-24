@@ -48,8 +48,10 @@ endif (ANDROID)
 if (CRASHPAD_HANDLER_GENERATE_STATIC_LIB)
     add_library(handlerlib STATIC ${CRASHPAD_HANDLER_LIBRARY_FILES})
     target_compile_features(handlerlib PUBLIC cxx_std_17)
-    target_link_libraries(handlerlib PRIVATE client tools compat snapshot minidump) 
-    target_include_directories(handlerlib PUBLIC ..)
+    target_link_libraries(handlerlib PRIVATE client tools compat snapshot minidump)
+    target_include_directories(handlerlib
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+        PUBLIC $<INSTALL_INTERFACE:include/crashpad>)
 endif(CRASHPAD_HANDLER_GENERATE_STATIC_LIB)
 
 add_executable(handler main.cc)

@@ -60,17 +60,27 @@ target_sources(compat PRIVATE ${CRASHPAD_COMPAT_LIBRARY_FILES})
 target_link_libraries(compat PUBLIC util compat_incl)
 
 if (LINUX)
-    target_include_directories(compat_incl INTERFACE linux)
-    target_include_directories(compat_incl INTERFACE non_win)
+    target_include_directories(compat_incl
+        INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/linux>
+        INTERFACE $<INSTALL_INTERFACE:include/crashpad/compat/linux>)
+
+    target_include_directories(compat_incl
+        INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/non_win>
+        INTERFACE $<INSTALL_INTERFACE:include/crashpad/compat/non_win>)
 endif (LINUX)
 
 if (ANDROID)
-    target_include_directories(compat_incl INTERFACE android)
+    target_include_directories(compat_incl
+        INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/android>
+        INTERFACE $<INSTALL_INTERFACE:include/crashpad/compat/android>)
 endif (ANDROID)
 
 if (WIN32)
-    target_include_directories(compat_incl INTERFACE win)
+    target_include_directories(compat_incl
+        INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/win>
+        INTERFACE $<INSTALL_INTERFACE:include/crashpad/compat/win>)
 else ()
-    target_include_directories(compat_incl INTERFACE non_win)
+    target_include_directories(compat_incl
+        INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/non_win>
+        INTERFACE $<INSTALL_INTERFACE:include/crashpad/compat/non_win>)
 endif (WIN32)
-

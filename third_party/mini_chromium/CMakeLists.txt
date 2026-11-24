@@ -140,7 +140,9 @@ endif (WIN32)
 
 add_library(mini_chromium OBJECT ${CRASHPAD_MINI_CHROMIUM_LIBRARY_FILES})
 target_compile_features(mini_chromium PUBLIC cxx_std_20)
-target_include_directories(mini_chromium PUBLIC mini_chromium)
+target_include_directories(mini_chromium
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/mini_chromium>
+    PUBLIC $<INSTALL_INTERFACE:include/crashpad/mini_chromium>)
 
 if (APPLE)
     target_compile_options(mini_chromium PRIVATE -fobjc-arc)
